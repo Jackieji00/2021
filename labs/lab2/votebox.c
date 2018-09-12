@@ -1,10 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-int main() {
-  int size;
-  printf("Please input an integer value: " );
-  scanf("%i\n",&size );
+void vote_box(int size){
   for(int i = 0;i<size;i++){
       printf("-");
   }
@@ -38,5 +35,10 @@ int main() {
       printf("-");
   }
   printf("\n" );
-  return 0;
+}
+int main() {
+  int size;
+  printf("Please input an integer value: " );
+  scanf("%i\n",&size );
+  vote_box(size);
 }
