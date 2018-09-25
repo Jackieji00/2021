@@ -224,28 +224,33 @@ int* multiply(int* input1, int* input2, int base) {
 	int carry = 0;
   int l1 = bignum_length(input1);
   int l2 = bignum_length(input2);
-  printf("\nl1:%d,l2:%d\n",l1,l2);
-  int lResult,d,mul1,mul2;
-	int lengthG = (greater_than(input1,input2))?l1:l2;
+  int lResult,mul1;
 	int* result;
+  int* mul;
 	if(input1[0]*input2[0]>=base){
 		result = malloc((l1+l2)*sizeof(int));
+    mul = malloc((l1+l2)*sizeof(int));
     lResult = l1+l2;
 	}else{
-		result = malloc((lengthG)*sizeof(int));
+		result = malloc((l1+l2-1)*sizeof(int));
+    mul = malloc((l1+l2-1)*sizeof(int));
     lResult = l1+l2-1;
 	}
-  printf("lResult:%d\n",lResult);
   result[lResult]= -1;
-	for(int i =lResult-1;i>=0;i--){
-    d=lResult-i;
-    mul1=(l1-d>=0)?input1[l1-d]:0;
-    mul2=(l2-d>=0)?input2[l2-d]:0;
-		result[i] = mul1*mul2%base+carry;
-		carry =(mul1*mul2+result[i])/base;
-    printf("i:%d,input1:%d,input2:%d\n",i,mul1,mul2);
-    printf("carry:%d,result %d\n",carry,result[i]);
-	}
+  mul = malloc((l1+l2)*sizeof(int));
+  for(int z=0;z<=l1+l2;z++){
+    mul[z]=0;
+  }
+  for(int i=0;i<l1;i++){
+    for(int j=0;j<l2;j++){
+      mul[j+i]=input1[i]*input2[j]+mul[j+i];
+    }
+  }
+  for(int c=lResult-1;c>=0;c--){
+    mul1=(c-1>=0)?mul[c-1]:0;
+    result[c]=(mul1+carry)%base;
+    carry = (mul1+carry)/base;
+  }
 	return result;
 }
 
@@ -255,7 +260,7 @@ int main(){
   printf("vaild input:%d\n",valid_input(input,18));
   int arr[] = {9,10,16,5,-1};
   bignum_print(arr);
-  int la1[]= {5, 8, -1};
+  int la1[]= {5, 8,7, -1};
   int la2[] = {6, 3, -1};
   printf("less_than: %d\n",less_than(la1,la2));
   printf("multiply: ");

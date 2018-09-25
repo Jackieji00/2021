@@ -6,6 +6,9 @@
  * modified by Ry Wiese, Min Choi, Aaron Councilman
  * ---------- */
 
+ /*name: Jackie Ji
+  *x500: JI000011
+  */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -96,12 +99,8 @@ bool valid_base(int base) {
 	     char* numLetter = malloc(base*2-9);           /*create an array that only contains vaild numbers and letters*/
 	     strcpy(numLetter,numbers);
 	     for(int i =0;i<(base*2-20);i++){
-	       // printf("%c\n", *(letters+i));
-	       *(numLetter+9+i) = *(letters+i);
-	       // printf("%s\n",numLetter);
+	       *(numLetter+10+i) = *(letters+i);
 	     }
-	     // numLetter[i] = '\0';
-	     printf("%s\n",numLetter );
 	     if(strspn(input,numLetter)!=strlen(input)){   /*check the matching length if is same as the input*/
 	       return false;
 	     }
@@ -158,12 +157,11 @@ int bignum_length(int* num) {
  	/* Then, print each digit */
  	for(i = 0; num[i] >= 0; i++) {
      if(num[i]<10){
-       printf("%d\n", num[i]);
+       printf("%d", num[i]);
      }else{
-       printf("%c\n",(char)(num[i]+87));
+       printf("%c",(char)(num[i]+87));
      }
  	}
- 	printf("\n");
  }
 
 /*
@@ -282,22 +280,45 @@ bool equal_to(int* input1, int* input2) {
  * TODO
  * multiply input1 * input2
  */
-int* multiply(int* input1, int* input2, int base) {
-	int carry = 0;
-	int length = (greater_than(input1,input2))?bignum_length(input1):bignum_length(input2);
-	int* result;
-	if(input1[0]*input2[0]>=base){
-		result = malloc((length+1)*sizeof(int));
-	}else{
-		result = malloc(length*sizeof(int));
-	}
-	for(int i =length;i>0;--i){
-		result[i] = input1[i]*input2[i]%base+carry;
-		carry = input1[i]*input2[i]/base;
-
-	}
-	return result;
-}
+ int* multiply(int* input1, int* input2, int base) {
+ 	 int carry = 0;
+   int l1 = bignum_length(input1);
+   int l2 = bignum_length(input2);
+   int lResult,mul1;
+ 	 int* result;
+   int* mul;
+ 	 if(input1[0]*input2[0]>=base){               /*calculate the result length*/
+ 		 result = malloc((l1+l2+1)*sizeof(int));
+     mul = malloc((l1+l2+1)*sizeof(int));
+     lResult = l1+l2+1;
+ 	 }else{
+ 		 result = malloc((l1+l2)*sizeof(int));
+     mul = malloc((l1+l2)*sizeof(int));
+     lResult = l1+l2;
+ 	 }
+     result[lResult-1]= -1;
+     mul = malloc((l1+l2)*sizeof(int));
+   for(int z=0;z<=l1+l2;z++){                   /*set inital value at zero*/
+     mul[z]=0;
+   }
+   for(int i=0;i<l1;i++){                       /*calculate the result on each place without carryover*/
+     for(int j=0;j<l2;j++){
+       mul[j+i]=input1[i]*input2[j]+mul[j+i];
+			 printf("[%d]:%d\n",j+i,mul[j+i] );
+     }
+   }
+   for(int c=lResult-2;c>=0;c--){               /*calculate the carryover part and place each digit on its place*/
+     if(mul[0]>base){                           /*if check the length,so that to find mul index*/
+			 mul1=(c-1>=0)?mul[c-1]:0;
+		 }else{
+			 mul1=mul[c];
+		 }
+     result[c]=(mul1+carry)%base;
+		 printf("%d,%d,%d\n",c,result[c],lResult);
+     carry = (mul1+carry)/base;
+   }
+ 	return result;
+ }
 
 /*
  * TODO
@@ -323,6 +344,28 @@ void perform_operation(int* input1, int* input2, char op, int base) {
 	 * TODO
 	 * Handle multiplication, less than, greater than, and equal to
 	 */
+	 else if(op == '*'){
+		int* result = multiply(input1, input2, base);
+ 		printf("Result: ");
+ 		bignum_print(result);
+ 		printf("\n");
+ 		free(result);
+	}else if(op=='<'){
+		bool r = less_than(input1, input2);
+		printf("Result: ");
+		char* result = (r==1)?"true":"false";
+		printf("%s\n",result);
+	}else if(op=='>'){
+		bool r = greater_than(input1, input2);
+		printf("Result: ");
+		char* result = (r==1)?"true":"false";
+		printf("%s\n",result);
+	}else{
+		bool r = equal_to(input1, input2);
+		printf("Result: ");
+		char* result = (r==1)?"true":"false";
+		printf("%s\n",result);
+	}
 }
 
 /*
