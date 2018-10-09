@@ -285,8 +285,8 @@ bool equal_to(int* input1, int* input2) {
    int l1 = bignum_length(input1);
    int l2 = bignum_length(input2);
    int lResult,mul1;
- 	 int* result;
-   int* mul;
+ 	 int* result;                                 /*to store result*/
+   int* mul;                                    /*to store result after multiply without carryover*/
  	 if(input1[0]*input2[0]>=base){               /*calculate the result length*/
  		 result = malloc((l1+l2+1)*sizeof(int));
      mul = malloc((l1+l2+1)*sizeof(int));
@@ -298,23 +298,23 @@ bool equal_to(int* input1, int* input2) {
  	 }
      result[lResult-1]= -1;
      mul = malloc((l1+l2)*sizeof(int));
-   for(int z=0;z<=l1+l2;z++){                   /*set inital value at zero*/
+   for(int z=0;z<=l1+l2;z++){                   /*set all inital value zero*/
      mul[z]=0;
    }
    for(int i=0;i<l1;i++){                       /*calculate the result on each place without carryover*/
      for(int j=0;j<l2;j++){
        mul[j+i]=input1[i]*input2[j]+mul[j+i];
-			 printf("[%d]:%d\n",j+i,mul[j+i] );
+			 // printf("[%d]:%d\n",j+i,mul[j+i] );
      }
    }
    for(int c=lResult-2;c>=0;c--){               /*calculate the carryover part and place each digit on its place*/
-     if(mul[0]>base){                           /*if check the length,so that to find mul index*/
+     if(mul[0]>base){                           /*if check the length in order to find correct mul index*/
 			 mul1=(c-1>=0)?mul[c-1]:0;
 		 }else{
 			 mul1=mul[c];
 		 }
      result[c]=(mul1+carry)%base;
-		 printf("%d,%d,%d\n",c,result[c],lResult);
+		 // printf("%d,%d,%d\n",c,result[c],lResult);
      carry = (mul1+carry)/base;
    }
  	return result;
