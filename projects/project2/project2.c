@@ -99,7 +99,6 @@ void add(reg reg1, reg reg2, reg result_reg) {
                 }
                 result_reg[i] = '0';
             }
-
         }else{
             result_reg[i] = '1';
             if (b == 1 ){
