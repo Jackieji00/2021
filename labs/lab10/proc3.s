@@ -1,8 +1,8 @@
-	.file	"proc2.c"
+	.file	"proc3.c"
 	.text
-	.globl	sum_of_squares
-	.type	sum_of_squares, @function
-sum_of_squares:
+	.globl	return_larger
+	.type	return_larger, @function
+return_larger:
 .LFB0:
 	.cfi_startproc
 	pushq	%rbp
@@ -13,16 +13,17 @@ sum_of_squares:
 	movl	%edi, -4(%rbp)
 	movl	%esi, -8(%rbp)
 	movl	-4(%rbp), %eax
-	imull	-4(%rbp), %eax
-	movl	%eax, %edx
-	movl	-8(%rbp), %eax
-	imull	-8(%rbp), %eax
-	addl	%edx, %eax
+	cmpl  -8(%rbp), %eax
+	jle   .L2
+	jmp   .L3
+.L2:
+	movl  -8(%rbp),%eax
+.L3:
 	popq	%rbp
 	.cfi_def_cfa 7, 8
 	ret
 	.cfi_endproc
 .LFE0:
-	.size	sum_of_squares, .-sum_of_squares
+	.size	return_larger, .-return_larger
 	.ident	"GCC: (Ubuntu 7.3.0-27ubuntu1~18.04) 7.3.0"
 	.section	.note.GNU-stack,"",@progbits

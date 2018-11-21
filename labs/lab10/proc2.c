@@ -1,3 +1,3 @@
 int sum_of_squares(int x,int y){
-  return x;
+  return x*x +y*y;
 }
