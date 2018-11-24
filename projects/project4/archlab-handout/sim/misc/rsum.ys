@@ -1,0 +1,52 @@
+# Name: Jackie Ji
+# ID:5404753
+
+# Execution begins at address 0
+.pos 0
+irmovq stack,%rsp
+call main
+halt
+# Sample linked list
+  .align 8
+ele1:
+  .quad 0xa00
+  .quad ele2
+ele2:
+  .quad 0x0b0
+  .quad ele3
+ele3:
+  .quad 0x00c
+  .quad 0
+
+  #long sum_list(list_ptr ls) {
+  # long val = 0;
+  # while (ls) {
+  #   val += ls->val;
+  #   ls = ls->next;}
+  # return val;}
+main:
+  irmovq ele1,%rdi
+  call rsum_list
+  ret
+#long sum_list(list_ptr ls)
+#list_ptr ls in %rdi
+rsum_list:
+  irmovq $0,%r8   #constant 0
+  xorq %rax,%rax  #val = 0
+  jmp test
+loop:
+  pushq %rbx
+  mrmovq (%rdi),%rbx
+  mrmovq 8(%rdi),%rdi
+  call rsum_list
+  addq %rbx,%rax
+  popq %rbx
+  ret
+test:
+  subq %r8,%rdi
+  jne loop
+  irmovq $0,%rax
+  ret
+#Stack starts here and grows to lower addresses
+  .pos 0x200
+stack:
