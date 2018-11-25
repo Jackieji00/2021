@@ -1,3 +1,15 @@
+# Name: Jackie Ji
+# ID:5404753
+#Fertch: icode:ifun <-M1[PC]
+#        rA:rB<-M1[PC+1]
+#        valC<-M8[PC+2]
+#        valP<-PC+10
+#Decode: valB<-R[rB]
+#Ececute:valE<-valB+valC
+#        Set CC
+#Memory:
+#Write Back: R[rB]<-valE
+#PC update: PC<-valP
 #/* $begin seq-all-hcl */
 ####################################################################
 #  HCL Description of Control for Single Cycle Y86-64 Processor SEQ   #
