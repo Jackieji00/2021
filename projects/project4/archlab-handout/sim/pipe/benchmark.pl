@@ -20,7 +20,7 @@ $verbose = 1;
 ## Grading criteria
 $totalpoints = 60;
 # What CPE is required to get full credit?
-$fullcpe = 7.65;
+$fullcpe = 8.5;
 # What CPE is required to get nonzero credit:
 $threshcpe = 10.5;
 
