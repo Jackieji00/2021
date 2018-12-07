@@ -1,0 +1,10 @@
+Step1:
+  1a: strong
+  1b: weak
+  1c: does matter
+  1d: neither
+  1e: neither
+  1f: neither
+  1g: strong
+  1h: neither
+  1i: strong

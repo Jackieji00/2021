@@ -11,6 +11,14 @@ main:  irmovq Stack, %rsp    # Set up stack pointer
   call ncopy     
   halt      # should halt with num nonzeros in %rax
 StartFun:
+# Name: Jackie Ji
+# ID:5404753
+# Description:
+#    1. change addq to iaddq for constant adding to register is faster than register adding to register.
+#    2. add a new register R11 to avoid hazard
+#    3. Using loop unroling method to create 6*1 loop;
+#    4. Create binary search tree to clean up the array element less than 6.
+#    5. Let 6 elements be a set. Using parenthese outside to iterate thought set like mrmovq -40(%rdi), %r11.
 #/* $begin ncopy-ys */
 ##################################################################
 # ncopy.ys - Copy a src block of len words to dst.
@@ -30,22 +38,109 @@ ncopy:
 # You can modify this portion
   # Loop header
   xorq %rax,%rax    # count = 0;
-  andq %rdx,%rdx    # len <= 0?
-  jle Done    # if so, goto Done:
-
-Loop:  mrmovq (%rdi), %r10  # read val from src...
-  rmmovq %r10, (%rsi)  # ...and store it to dst
+  iaddq $-5,%rdx    # len > 5?
+  jle Reset    # if so, goto Done:
+Loop:
+  andq %rax,%rax     #set CC
+  mrmovq (%rdi), %r10  # src->val
+  iaddq $48,%rdi
+  rmmovq %r10, (%rsi)  # val->dst
+  mrmovq -40(%rdi), %r11 # src+1->val
+  iaddq $48,%rsi
+  andq %r10, %r10    # val >= 0?
+  jg branch1    # if so, goto branch1:
+  iaddq $1, %rax    # count++
+branch1:
+  rmmovq %r11, -40(%rsi)  # val->dst+1
+  mrmovq -32(%rdi), %r10 # src+2->val
+  andq %r11, %r11    # val >= 0?
+  jg branch2    # if so, goto branch2:
+  iaddq $1, %rax    # count++
+branch2:
+  rmmovq %r10, -32(%rsi) # val->dst+2
+  mrmovq -24(%rdi), %r11 # src+3->val
   andq %r10, %r10    # val > 0?
-  jg Npos    # if so, goto Npos:
-  irmovq $1, %r10
-  addq %r10, %rax    # count++
-Npos:  irmovq $1, %r10
-  subq %r10, %rdx    # len--
-  irmovq $8, %r10
-  addq %r10, %rdi    # src++
-  addq %r10, %rsi    # dst++
-  andq %rdx,%rdx    # len > 0?
+  jg branch3    # if so, goto branch3:
+  iaddq $1, %rax    # count++
+branch3:
+  rmmovq %r11, -24(%rsi) # val->dst+3
+  mrmovq -16(%rdi), %r10 # src+4->val
+  andq %r11, %r11    # val > 0?
+  jg branch4    # if so, goto branch4:
+  iaddq $1, %rax    # count++
+branch4:
+  rmmovq %r10, -16(%rsi) # val->dst+4
+  mrmovq -8(%rdi), %r11 # src+5->val
+  andq %r10, %r10    # val > 0?
+  jg branch5    # if so, goto branch5:
+  iaddq $1, %rax    # count++
+branch5:
+  rmmovq %r11, -8(%rsi) # val->dst+5
+  andq %r11, %r11    # val > 0?
+  jg branch6    # if so, goto branch6:
+  iaddq $1, %rax    # count++
+branch6:
+  iaddq $-6, %rdx    # len>5?
   jg Loop      # if so, goto Loop:
+Reset:
+  iaddq $3,%rdx    #This is the binary search tree to clean up
+  jl tr1
+  jg tr3
+  jmp branch2T
+tr3:
+  iaddq $-2,%rdx
+  jl tr2
+  jg branch5T
+  jmp branch4T
+tr2:
+  iaddq $1,%rdx
+  je branch3T
+  jmp tr0
+tr1:
+  iaddq $1,%rdx
+  je branch1T
+tr0:
+  jmp Done
+branch5T:
+  mrmovq (%rdi), %r10
+  iaddq $8, %rdi
+  rmmovq %r10, (%rsi)
+  iaddq $8, %rsi
+  andq %r10, %r10
+  jg branch4T
+  iaddq $1, %rax
+branch4T:
+  mrmovq (%rdi), %r10
+  iaddq $8, %rdi
+  rmmovq %r10, (%rsi)
+  iaddq $8, %rsi
+  andq %r10, %r10
+  jg branch3T
+  iaddq $1, %rax
+branch3T:
+  mrmovq (%rdi), %r10
+  iaddq $8, %rdi
+  rmmovq %r10, (%rsi)
+  iaddq $8, %rsi
+  andq %r10, %r10
+  jg branch2T
+  iaddq $1, %rax
+branch2T:
+  mrmovq (%rdi), %r10
+  iaddq $8, %rdi
+  rmmovq %r10, (%rsi)
+  iaddq $8, %rsi
+  andq %r10, %r10
+  jg branch1T
+  iaddq $1, %rax
+branch1T:
+  mrmovq (%rdi), %r10
+  rmmovq %r10, (%rsi)
+  andq %r10, %r10
+  jg Done
+  iaddq $1, %rax
+
+
 ##################################################################
 # Do not modify the following section of code
 # Function epilogue.
@@ -55,7 +150,6 @@ Done:
 # Keep the following label at the end of your function
 End:
 #/* $end ncopy-ys */
-
 EndFun:
 
 ###############################
@@ -64,8 +158,8 @@ EndFun:
   .align 8
 src:
 	.quad -1
-	.quad -2
-	.quad 3
+	.quad 2
+	.quad -3
 	.quad 4
   .quad 0xbcdefa # This shouldn't get moved
 

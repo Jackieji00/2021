@@ -1,0 +1,139 @@
+                            | # Name: Jackie Ji
+                            | # ID:5404753
+                            | # Description:
+                            | #    1. change addq to iaddq for constant adding to register is faster than register adding to register.
+                            | #    2. add a new register R11 to avoid hazard
+                            | #    3. Using loop unroling method to create 6*1 loop;
+                            | #    4. Create binary search tree to clean up the array element less than 6.
+                            | #    5. Let 6 elements be a set. Using parenthese outside to iterate thought set like mrmovq -40(%rdi), %r11.
+                            | #/* $begin ncopy-ys */
+                            | ##################################################################
+                            | # ncopy.ys - Copy a src block of len words to dst.
+                            | # Return the number of negative words (<0) contained in src.
+                            | #
+                            | # Include your name and ID here.
+                            | #
+                            | # Describe how and why you modified the baseline code.
+                            | #
+                            | ##################################################################
+                            | # Do not modify this portion
+                            | # Function prologue.
+                            | # %rdi = src, %rsi = dst, %rdx = len
+0x000:                      | ncopy:
+                            | 
+                            | ##################################################################
+                            | # You can modify this portion
+                            |   # Loop header
+0x000: 6300                 |   xorq %rax,%rax    # count = 0;
+0x002: c0f2fbffffffffffffff |   iaddq $-5,%rdx    # len > 5?
+0x00c: 713401000000000000   |   jle Reset    # if so, goto Done:
+0x015:                      | Loop:
+0x015: 6200                 |   andq %rax,%rax     #set CC
+0x017: 50a70000000000000000 |   mrmovq (%rdi), %r10  # src->val
+0x021: c0f73000000000000000 |   iaddq $48,%rdi
+0x02b: 40a60000000000000000 |   rmmovq %r10, (%rsi)  # val->dst
+0x035: 50b7d8ffffffffffffff |   mrmovq -40(%rdi), %r11 # src+1->val
+0x03f: c0f63000000000000000 |   iaddq $48,%rsi
+0x049: 62aa                 |   andq %r10, %r10    # val >= 0?
+0x04b: 765e00000000000000   |   jg branch1    # if so, goto branch1:
+0x054: c0f00100000000000000 |   iaddq $1, %rax    # count++
+0x05e:                      | branch1:
+0x05e: 40b6d8ffffffffffffff |   rmmovq %r11, -40(%rsi)  # val->dst+1
+0x068: 50a7e0ffffffffffffff |   mrmovq -32(%rdi), %r10 # src+2->val
+0x072: 62bb                 |   andq %r11, %r11    # val >= 0?
+0x074: 768700000000000000   |   jg branch2    # if so, goto branch2:
+0x07d: c0f00100000000000000 |   iaddq $1, %rax    # count++
+0x087:                      | branch2:
+0x087: 40a6e0ffffffffffffff |   rmmovq %r10, -32(%rsi) # val->dst+2
+0x091: 50b7e8ffffffffffffff |   mrmovq -24(%rdi), %r11 # src+3->val
+0x09b: 62aa                 |   andq %r10, %r10    # val > 0?
+0x09d: 76b000000000000000   |   jg branch3    # if so, goto branch3:
+0x0a6: c0f00100000000000000 |   iaddq $1, %rax    # count++
+0x0b0:                      | branch3:
+0x0b0: 40b6e8ffffffffffffff |   rmmovq %r11, -24(%rsi) # val->dst+3
+0x0ba: 50a7f0ffffffffffffff |   mrmovq -16(%rdi), %r10 # src+4->val
+0x0c4: 62bb                 |   andq %r11, %r11    # val > 0?
+0x0c6: 76d900000000000000   |   jg branch4    # if so, goto branch4:
+0x0cf: c0f00100000000000000 |   iaddq $1, %rax    # count++
+0x0d9:                      | branch4:
+0x0d9: 40a6f0ffffffffffffff |   rmmovq %r10, -16(%rsi) # val->dst+4
+0x0e3: 50b7f8ffffffffffffff |   mrmovq -8(%rdi), %r11 # src+5->val
+0x0ed: 62aa                 |   andq %r10, %r10    # val > 0?
+0x0ef: 760201000000000000   |   jg branch5    # if so, goto branch5:
+0x0f8: c0f00100000000000000 |   iaddq $1, %rax    # count++
+0x102:                      | branch5:
+0x102: 40b6f8ffffffffffffff |   rmmovq %r11, -8(%rsi) # val->dst+5
+0x10c: 62bb                 |   andq %r11, %r11    # val > 0?
+0x10e: 762101000000000000   |   jg branch6    # if so, goto branch6:
+0x117: c0f00100000000000000 |   iaddq $1, %rax    # count++
+0x121:                      | branch6:
+0x121: c0f2faffffffffffffff |   iaddq $-6, %rdx    # len>5?
+0x12b: 761500000000000000   |   jg Loop      # if so, goto Loop:
+0x134:                      | Reset:
+0x134: c0f20300000000000000 |   iaddq $3,%rdx    #This is the binary search tree to clean up
+0x13e: 729a01000000000000   |   jl tr1
+0x147: 765901000000000000   |   jg tr3
+0x150: 706d02000000000000   |   jmp branch2T
+0x159:                      | tr3:
+0x159: c0f2feffffffffffffff |   iaddq $-2,%rdx
+0x163: 727e01000000000000   |   jl tr2
+0x16c: 76b601000000000000   |   jg branch5T
+0x175: 70f301000000000000   |   jmp branch4T
+0x17e:                      | tr2:
+0x17e: c0f20100000000000000 |   iaddq $1,%rdx
+0x188: 733002000000000000   |   je branch3T
+0x191: 70ad01000000000000   |   jmp tr0
+0x19a:                      | tr1:
+0x19a: c0f20100000000000000 |   iaddq $1,%rdx
+0x1a4: 73aa02000000000000   |   je branch1T
+0x1ad:                      | tr0:
+0x1ad: 70d302000000000000   |   jmp Done
+0x1b6:                      | branch5T:
+0x1b6: 50a70000000000000000 |   mrmovq (%rdi), %r10
+0x1c0: c0f70800000000000000 |   iaddq $8, %rdi
+0x1ca: 40a60000000000000000 |   rmmovq %r10, (%rsi)
+0x1d4: c0f60800000000000000 |   iaddq $8, %rsi
+0x1de: 62aa                 |   andq %r10, %r10
+0x1e0: 76f301000000000000   |   jg branch4T
+0x1e9: c0f00100000000000000 |   iaddq $1, %rax
+0x1f3:                      | branch4T:
+0x1f3: 50a70000000000000000 |   mrmovq (%rdi), %r10
+0x1fd: c0f70800000000000000 |   iaddq $8, %rdi
+0x207: 40a60000000000000000 |   rmmovq %r10, (%rsi)
+0x211: c0f60800000000000000 |   iaddq $8, %rsi
+0x21b: 62aa                 |   andq %r10, %r10
+0x21d: 763002000000000000   |   jg branch3T
+0x226: c0f00100000000000000 |   iaddq $1, %rax
+0x230:                      | branch3T:
+0x230: 50a70000000000000000 |   mrmovq (%rdi), %r10
+0x23a: c0f70800000000000000 |   iaddq $8, %rdi
+0x244: 40a60000000000000000 |   rmmovq %r10, (%rsi)
+0x24e: c0f60800000000000000 |   iaddq $8, %rsi
+0x258: 62aa                 |   andq %r10, %r10
+0x25a: 766d02000000000000   |   jg branch2T
+0x263: c0f00100000000000000 |   iaddq $1, %rax
+0x26d:                      | branch2T:
+0x26d: 50a70000000000000000 |   mrmovq (%rdi), %r10
+0x277: c0f70800000000000000 |   iaddq $8, %rdi
+0x281: 40a60000000000000000 |   rmmovq %r10, (%rsi)
+0x28b: c0f60800000000000000 |   iaddq $8, %rsi
+0x295: 62aa                 |   andq %r10, %r10
+0x297: 76aa02000000000000   |   jg branch1T
+0x2a0: c0f00100000000000000 |   iaddq $1, %rax
+0x2aa:                      | branch1T:
+0x2aa: 50a70000000000000000 |   mrmovq (%rdi), %r10
+0x2b4: 40a60000000000000000 |   rmmovq %r10, (%rsi)
+0x2be: 62aa                 |   andq %r10, %r10
+0x2c0: 76d302000000000000   |   jg Done
+0x2c9: c0f00100000000000000 |   iaddq $1, %rax
+                            | 
+                            | 
+                            | ##################################################################
+                            | # Do not modify the following section of code
+                            | # Function epilogue.
+0x2d3:                      | Done:
+0x2d3: 90                   |   ret
+                            | ##################################################################
+                            | # Keep the following label at the end of your function
+0x2d4:                      | End:
+                            | #/* $end ncopy-ys */
